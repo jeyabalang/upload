@@ -45,28 +45,38 @@ def formhandler():
           os.remove("Cv_output.html")
         df = os.getcwd()+"/"+"Cv_parser_output.xlsx"
         
-       
-        datsets=pd.read_excel(df,na_values=" NaN")
+       # ,na_values="Na,
+        datsets=pd.read_excel(df, index=False)
         datsets.fillna("", inplace = True)
+        datsets.to_string(index=False)
         print(datsets,"datasets")
+
+        from IPython.core.display import HTML
+        pd.set_option('display.max_colwidth', -1)
+        datsets['Dateofbirth'] = datsets['Dateofbirth'].str.replace('\t', ' ').str.replace('\n', ' ')
+        datsets['addresses'] = datsets['addresses'].str.replace('\t', ' ').str.replace('\n', ' ')
         
+        datsets['work_experience'] = datsets['work_experience'].str.replace('\t', ' ').str.replace('\n', ' ')
         datsets.dropna(how='any')    #to drop if any value in the row has a nan
         datsets.dropna(how='all') 
         
         datsets.style.set_properties(**{'font-size': '11pt', 'font-family': 'Calibri','border-collapse': 'collapse','border': '1px solid black'}).render()
-        datsets.columns = ['Sr.no','Extension',   'FileName',   'Name'  , 'Email',   'Phone' ,' Date of birth', 'Addresses' ,'C.A institute',  'C.A year',   'C.A line',   'ICWA institute',   'ICWA year',    'ICWA line' ,'   B.COM institute', 'B.COM line', 'M.COM institute' ,'   M.COM year', 'M.COM line',' MBA institute',    'MBA-year', 'MBA-line', 'Degree' ,'Softskill','Workexperience' ,'Overall Experience']
+        datsets.columns = ['Extension',   'FileName',   'Name'  , 'Email',   'Phone' ,' Date of birth', 'Addresses' ,'Education','Education_year','Soft skill','Technical skill','Workexperience' ,'Overall Experience']
+        
+        print (datsets,"datasets of name ")
         Details = datsets.loc[:,"Extension":"Addresses"]
-        Education = datsets.loc[:,"C.A institute":"Degree"]
-    
-        Work_experience = datsets.loc[:,"Softskill":"Overall Experience"]
-       
+        Education = datsets.loc[:,"Education":"Education_year"]
+        
+        skill = datsets.loc[:,"Soft skill":"Technical skill"]
+        Work_experience=datsets.loc[:,"Workexperience":"Overall Experience"]
+
         Details=Details.T
         Education=Education.T
-        Work_experience=Work_experience.T
-     
-
+        skill=skill.T
+        work_experience=Work_experience.T
+      
         pd.set_option('colheader_justify', 'center')   # FOR TABLE <th>
-        pd.set_option('display.max_columns', None)  # or 1000
+        pd.set_option('display.max_columns', None)  # or 1000AN
         pd.set_option('display.max_rows', None)  # or 1000
         pd.set_option('display.max_colwidth', -1)  # or 199
         pd.describe_option('display')
@@ -90,7 +100,7 @@ def formhandler():
         '''
         html_string1 = '''
         <html>
-        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+       
         <h2><u>Educations</u></h2>
         
           {table}
@@ -98,9 +108,24 @@ def formhandler():
 
         </html>
 '''
+
+
         html_string2 = '''
         <html>
-        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+       
+        <h2><u>Skills</u></h2>
+        
+          {table}
+  
+
+        </html>
+        '''
+
+
+
+        html_string3 = '''
+        <html>
+       
         <h2><u>Work Experiences</u></h2>
         
           {table}
@@ -113,7 +138,7 @@ def formhandler():
 
          # OUTPUT AN HTML FILE
         with open('Cv_output.html', 'w') as f:
-            f.write(html_string.format(table=Details.to_html(classes='my_class').replace('<th>','<th style = "background-color: lightgreen" >').replace('<h2></h2>','<h2>Details</h2> ')+html_string1.format(table=Education.to_html(classes='my_class').replace('<th>','<th style = "background-color: lightgreen" >').replace('<h2>','<h2>Education Details'))+html_string2.format(table=Work_experience.to_html(classes='my_class').replace('<th>','<th style = "background-color: lightgreen" >').replace('\t',' ').replace('\n',''))))
+            f.write(html_string.format(table=Details.to_html(classes='my_class').replace('<th>','<th style = "background-color: lightgreen" >').replace('<h2></h2>','<h2>Details</h2>'))+html_string1.format(table=Education.to_html(classes='my_class').replace('<th>','<th style = "background-color: lightgreen" >').replace('<h2>','<h2>Education Details'))+html_string2.format(table=skill.to_html(classes='my_class').replace('<th>','<th style = "background-color: lightgreen" >').replace('<h2>','<h2>Education Details'))+html_string3.format(table=Work_experience.to_html(classes='my_class').replace('<th>','<th style = "background-color: lightgreen" >').replace('\t',' ').replace('\n','')))
             print("over")
         Javascript('''$('.my_class tbody tr').filter(':last').css('background-color', 'red');
                    ''')    
@@ -139,7 +164,7 @@ def formhandler():
 
 
 @route('/')
-def index():
+def index():    
 
     #refereshing the mulitple duration for the link
     #response = "<head><meta http-equiv='refresh' content='5'></head>"

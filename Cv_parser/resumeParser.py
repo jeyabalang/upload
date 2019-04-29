@@ -81,20 +81,23 @@ class exportToCSV_and_exportToExcel:
             fOut.write('FAILED_TO_WRITE\n')
         fOut.close()
         print(infoDict,"excel")
-
+        del infoDict['otherNameHits']
        
         dict_df = pd.DataFrame({ key:pd.Series(value) for key, value in infoDict.items() })
 
         dict_df
         df = (dict_df.T)
 
+        print(df,"exportToCSV_and_exportToExcel")
+
 
         print (df)
         if os.path.exists("Cv_parser_output.xlsx"):
-          os.remove("Cv_parser_output.xlsx")
+            print("enter to Cv_parser_output")
+            os.remove("Cv_parser_output.xlsx")
     
 
-        dict_df.to_excel('Cv_parser_output.xlsx')
+        dict_df.to_excel('Cv_parser_output.xlsx',index=False)
 
         return infoDict
         
@@ -145,50 +148,115 @@ class Parse():
 
             self.addresses(self.inputString,info)
 
+            self.extract_education(self.inputString,info)
 
-            self.Qualification(self.inputString,info)
+            # self.Qualification(self.inputString,info)
+
+            self.softskill(self.inputString,info)
 
             self.technicalskill(self.inputString,info)
+            
+            # self.technicalskill(self.inputString,info)
 
             print("work_experience")
             self.work_experience(self.inputString,info)
 
             self.getExperience(self.inputString,info)
-           
-
+          
             print(info,"information") 
-            del info['otherNameHits']
-            if info['m\.?comline']:
-               continue
-            else:     
-             del info['m\.?comline']
            
             print(info,"info")
             csv=exportToCSV_and_exportToExcel()
             csv.write(info)
             self.information.append(info)
 
+    def softskill(self,inputString,infoDict):
+     
+        infoDict['softskill']="NONE"
+        try:
+            print("enter_softskill")
+            import pandas as pd
+            import spacy
+
+            # load pre-trained model
+            nlp = spacy.load('en_core_web_sm')
+            nlp_text = nlp(inputString)
+            noun_chunks = nlp_text.noun_chunks
+           
+            # removing stop words and implementing word tokenization
+            tokens = [token.text for token in nlp_text if not token.is_stop]
+            
+            # reading the csv file
+            data = pd.read_csv("skills.csv") 
+            
+            # extract values
+            skills = list(data.columns.values)
+            
+            skillset = []
+            print("enter_softskill")
+            
+            # check for one-grams (example: python)
+            for token in tokens:
+                if token.lower() in skills:
+                    skillset.append(token)
+            
+            # check for bi-grams and tri-grams (example: machine learning)
+            for token in noun_chunks:
+                token = token.text.lower().strip()
+                if token in skills:
+                    skillset.append(token)
+            softskill=[i.capitalize() for i in set([i.lower() for i in skillset])]
+            print(softskill,"softskill")
+            infoDict["softskill"]=softskill
+           
+        except Exception as e:
+                print (e )      
+              
     def technicalskill(self,inputString,infoDict):
-         infoDict['softskill']=0
-         try:
-                print(inputString,"string_text")
-                pattern = re.compile(r'(((accomplishments)(.+)((?:\n.+)+)(credentials))|((Activities|softskills)(.+)((?:\n.+)+)))',re.I)
+     
+        infoDict['technicalskill']="NONE"
+        try:
+            print("enter_softskill")
+            import pandas as pd
+            import spacy
 
-                matches = pattern.search(inputString) # Gets all email addresses as a list
-                experience = matches.group()
-                print(experience,"experience_softskill")
-                softskill=experience.splitlines()
-                print(softskill[0],"softskill")
-                if "Accomplishments\t\t"==softskill[0]:
-                    del softskill[0]
-                if  "Personal Credentials"==softskill[len(softskill)-1]:
-                    del softskill[len(softskill)-1]
+            # load pre-trained model
+            nlp = spacy.load('en_core_web_sm')
+            nlp_text = nlp(inputString)
+            noun_chunks = nlp_text.noun_chunks
+            print(noun_chunks,"noun_chunks")
+            # removing stop words and implementing word tokenization
+            tokens = [token.text for token in nlp_text if not token.is_stop]
+            
+            # reading the csv file
+            data = pd.read_csv("technical_skill.csv") 
+            
+            # extract values
+            skills = list(data.columns.values)
+            
+            skillset = []
+            print("enter_softskill")
+            
+            # check for one-grams (example: python)
+            for token in tokens:
+                if token.lower() in skills:
+                    skillset.append(token)
+            
+            # check for bi-grams and tri-grams (example: machine learning)
+            for token in noun_chunks:
+                token = token.text.lower().strip()
+                print(token,"token")
+                if token in skills:
+                    skillset.append(token)
+            softskill=[i.capitalize() for i in set([i.lower() for i in skillset])]
+            print(softskill,"softskill")
+            infoDict["technicalskill"]=softskill
+           
+        except Exception as e:
+                print (e )      
 
 
-                infoDict['softskill'] = softskill
-         except Exception as e:
-            print (e ) 
-          
+
     def experience_institute(self,inputString,infoDict):
          infoDict['experience']=0
          try:
@@ -203,15 +271,22 @@ class Parse():
     def work_experience(self,inputString,infoDict):
         infoDict['work_experience'] = "None" 
         experiences=[]  
+        outs=[]
         try:
            import re
            print ("work_experience")
-           pattern = re.compile(r'((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(\s)(?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(.*))|((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(\s)(present)(.*))|(EXPERIENCE(.+)((?:\n.+)+))')
-           match = pattern.findall(inputString)
-           print(match,"match")
-           infoDict['work_experience']=match
+           regex = r"((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(\s)(?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(.*))|((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(\s)(present)(.*))|(EXPERIENCE(.+)((?:\n.+)+))"
+           matches = re.finditer(regex, inputString, re.MULTILINE)
+           print(inputString,"      ")
+           for matchNum, match in enumerate(matches, start=1):
+                if match.group():
+                    print(match.group(),"work_experience")
+               
+                    outs+=match.group().split(".")
+           print(outs,"lines of experience")
+           infoDict['work_experience']=outs 
         except Exception as e:
-            print (e )
+            print (e)
     
     def dateofbirth(self,inputString,infoDict):
         infoDict['Dateofbirth'] = None
@@ -235,6 +310,74 @@ class Parse():
                         infoDict['addresses'] = addresses.replace('Permanent Address','')
         except Exception as e:
             print (e )
+
+
+
+
+
+    def extract_education(self,inputString,infoDict):
+        import re
+        import spacy
+        from nltk.corpus import stopwords
+
+        # load pre-trained model
+        nlp = spacy.load('en_core_web_sm')
+
+        # Grad all general stop words
+        STOPWORDS = set(stopwords.words('english'))
+
+        # Education Degrees
+        EDUCATION = [
+                    'BE','B.E.', 'B.E', 'BS', 'B.S', 
+                    'ME', 'M.E', 'M.E.', 'MS', 'M.S', 
+                    'BTECH', 'B.TECH', 'M.TECH', 'MTECH', 'ca',
+                    'SSC', 'HSC', 'CBSE', 'ICSE', 'X', 'XII','mba-finance',
+                ]
+
+        nlp_text = nlp(inputString)
+
+        # Sentence Tokenizer
+        nlp_text = [sent.string.strip() for sent in nlp_text.sents]
+
+        edu = {}
+        # Extract education degree
+        for index, text in enumerate(nlp_text):
+            for tex in text.split():
+                # Replace all special symbols
+                tex = re.sub(r'[?|$|.|!|,]', r'', tex)
+                if tex.upper().lower() in EDUCATION and tex not in STOPWORDS:
+                    print(tex,EDUCATION,"equivalence of value ")
+                    edu[tex] = text + nlp_text[index + 1]
+
+            # Extract year
+        education = []
+        infoDict['educations']=0
+        infoDict['educations_year']=0
+        educations=[]
+        educations_years=[]
+        for key in edu.keys():
+                year = re.search(re.compile(r'(((20|19)(\d{2})))'), edu[key])
+                print(year)
+                if year:
+                    education.append((key, ''.join(year[0])))
+                else:
+                    education.append(key)
+                print(education,"education")
+        for i in range(0,2):
+            count=0
+            for j in range(0,2):
+                
+                if count==0:
+                    educations.append(education[i][j])
+                    print(education[i][j])
+                if count==1:
+                    educations_years.append(education[i][j])
+                    print(education[i][j])
+                count+=1  
+        print(educations,educations_years)        
+        infoDict['educations']=educations
+        infoDict['educations_year']=educations_years          
+                           
 
     def readFile(self, fileName):
         '''
@@ -411,7 +554,7 @@ class Parse():
         indianNames = set(indianNames.split())
         
 
-        # otherNameHits = []
+        otherNameHits = []
         nameHits = []
         name = None
 
@@ -465,7 +608,7 @@ class Parse():
     
 
     def getExperience(self,inputString,infoDict,debug=False):
-
+        experience=0
         print("experience")
         try:
             for sentence in self.lines:#find the index of the sentence where the degree is find and then analyse that sentence
@@ -614,6 +757,8 @@ class Parse():
 
 
 if __name__ == "__main__":
+
+
     verbose = False
     if "-v" in str(sys.argv):
         verbose = True
