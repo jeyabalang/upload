@@ -96,7 +96,7 @@ class exportToCSV_and_exportToExcel:
             print("enter to Cv_parser_output")
             os.remove("Cv_parser_output.xlsx")
     
-
+        dict_df.to_csv('csv_file.csv',index=False)
         dict_df.to_excel('Cv_parser_output.xlsx',index=False)
 
         return infoDict
@@ -150,7 +150,7 @@ class Parse():
 
             self.extract_education(self.inputString,info)
 
-            # self.Qualification(self.inputString,info)
+            self.Qualification(self.inputString,info)
 
             self.softskill(self.inputString,info)
 
@@ -185,6 +185,7 @@ class Parse():
            
             # removing stop words and implementing word tokenization
             tokens = [token.text for token in nlp_text if not token.is_stop]
+            print(tokens)
             
             # reading the csv file
             data = pd.read_csv("skills.csv") 
@@ -202,7 +203,9 @@ class Parse():
             
             # check for bi-grams and tri-grams (example: machine learning)
             for token in noun_chunks:
-                token = token.text.lower().strip()
+                token = token.text.lower().strip() 
+                token = re.sub(r'[?|$|.|!|,|*]', r'', token).lstrip()
+                print(token, "----------  ",skills,"checking of filesn")
                 if token in skills:
                     skillset.append(token)
             softskill=[i.capitalize() for i in set([i.lower() for i in skillset])]
@@ -216,7 +219,6 @@ class Parse():
      
         infoDict['technicalskill']="NONE"
         try:
-            print("enter_softskill")
             import pandas as pd
             import spacy
 
@@ -235,7 +237,6 @@ class Parse():
             skills = list(data.columns.values)
             
             skillset = []
-            print("enter_softskill")
             
             # check for one-grams (example: python)
             for token in tokens:
@@ -257,25 +258,54 @@ class Parse():
 
 
 
-    def experience_institute(self,inputString,infoDict):
-         infoDict['experience']=0
-         try:
-                pattern = re.compile(r'(?<=experience)(.*)',re.I)
-                matches = pattern.search(inputString) # Gets all email addresses as a list
-                experience = matches.group()
+    # def experience_institute(self,inputString,infoDict):
+    #      infoDict['experience']=0
+    #      try:
+    #             pattern = re.compile(r'(?<=experience)(.*)',re.I)
+    #             matches = pattern.search(inputString) # Gets all email addresses as a list
+    #             experience = matches.group()
 
-                infoDict['experience'] = experience
-         except Exception as e:
-            print (e )
-    
+    #             infoDict['experience'] = experience
+    #      except Exception as e:
+    #         print (e )
+    # def work_experience_year(self,inputString,infoDict):
+    #     infoDict['work_experience_year'] = "None" 
+    #     experiences=[]  
+    #     outs=[]
+    #     try:
+    #        import re
+    #        print ("work_experience")
+    #        regex = r"((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(\s)(?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s))|((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(\s)(present))"
+    #        matches = re.finditer(regex, inputString, re.MULTILINE)
+    #        print(inputString,"      ")
+    #        for matchNum, match in enumerate(matches, start=1):
+    #             if match.group():
+    #                 print(match.group(),"work_experience")
+               
+    #                 outs+=match.group().split(".")
+           
+    #        print(outs,"lines of experience")
+    #        infoDict['work_experience']=outs             
+    #        print(outs,"lines of experience")
+    #        infoDict['work_experience_year']=outs 
+    #     except Exception as e:
+    #         print (e)
+
     def work_experience(self,inputString,infoDict):
         infoDict['work_experience'] = "None" 
+        infoDict['work_experience_year'] = "None" 
         experiences=[]  
         outs=[]
+        outs1=[]
+        outlet=[]
+        final2=[]
+        final1=[]
         try:
            import re
+           import re
+           print(inputString,"messages")
            print ("work_experience")
-           regex = r"((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(\s)(?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(.*))|((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(\s)(present)(.*))|(EXPERIENCE(.+)((?:\n.+)+))"
+           regex = r"((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(.........))|((?:Jan|Feb|Mar|Apr|May|Jun|July|Aug|Sep|Oct|nov|Dec)(\s\d+\s)(~)(\s)(present))"
            matches = re.finditer(regex, inputString, re.MULTILINE)
            print(inputString,"      ")
            for matchNum, match in enumerate(matches, start=1):
@@ -283,15 +313,43 @@ class Parse():
                     print(match.group(),"work_experience")
                
                     outs+=match.group().split(".")
+           
            print(outs,"lines of experience")
-           infoDict['work_experience']=outs 
+           infoDict['work_experience']=outs             
+           print(outs,"lines of experience")
+         
+           print ("work_experience")
+           regex = r"((?:Jan|Feb|Apr|Mar(\s+)|Jun|July|Aug|Sep(.)(\d+)|sep.|sep|Oct|Dec)(.............)(.......................)(.....))|((?<=EXPERIENCE)(.+)((?:\n.+)+))"
+           matches = re.finditer(regex, inputString, re.MULTILINE)
+           print(inputString,"      ")
+           for matchNum, match in enumerate(matches, start=1):
+                if match.group():
+                    
+                    print(match.group(),"work_experience")
+               
+                    outs1+=match.group().split(".")
+           print(outs,"lines of experience")
+           for i in outs1:
+             splittedterm=i.split("\t")
+             count=0    
+             print(splittedterm,"the splittedterm")
+             for j in splittedterm:
+
+                if count==0:
+                    final1.append(j)
+                if count!=0:
+
+                    final2.append(j)
+                count+=1   
+           infoDict['work_experience']=final1
+           infoDict['work_experience_year'] =final2    
         except Exception as e:
             print (e)
     
     def dateofbirth(self,inputString,infoDict):
         infoDict['Dateofbirth'] = None
         try:
-                pattern = re.compile(r'(?<=date of birth)(.*)',re.I)
+                pattern = re.compile(r'((?<=Date of Birth)(\s+)(?:(?<!\:)(?<!\:\d)[0-3]?\d(?:st|nd|rd|th)?\s+(?:of\s+)?(?:jan\.?|january|feb\.?|february|mar\.?|march|apr\.?|april|may|jun\.?|june|jul\.?|july|aug\.?|august|sep\.?|september|oct\.?|october|nov\.?|november|dec\.?|december)|(?:jan\.?|january|feb\.?|february|mar\.?|march|apr\.?|april|may|jun\.?|june|jul\.?|july|aug\.?|august|sep\.?|september|oct\.?|october|nov\.?|november|dec\.?|december)\s+(?<!\:)(?<!\:\d)[0-3]?\d(?:st|nd|rd|th)?)(?:\,)?\s*(?:\d{4})?|[0-3]?\d[-\./][0-3]?\d[-\./]\d{2,4})|((?<=Date of Birth)(\s+)|(\w+)(?:(?<!\:)(?<!\:\d)[0-3]?\d(?:st|nd|rd|th)?\s+(?:of\s+)?(?:jan\.?|january|feb\.?|february|mar\.?|march|apr\.?|april|may|jun\.?|june|jul\.?|july|aug\.?|august|sep\.?|september|oct\.?|october|nov\.?|november|dec\.?|december)|(?:jan\.?|january|feb\.?|february|mar\.?|march|apr\.?|april|may|jun\.?|june|jul\.?|july|aug\.?|august|sep\.?|september|oct\.?|october|nov\.?|november|dec\.?|december)\s+(?<!\:)(?<!\:\d)[0-3]?\d(?:st|nd|rd|th)?)(?:\,)?\s*(?:\d{4})?|[0-3]?\d[-\./][0-3]?\d[-\./]\d{2,4})',re.I)
                 matches = pattern.search(inputString) # Gets all email addresses as a list
                 dateofbirth = matches.group()
 
@@ -302,7 +360,7 @@ class Parse():
     def addresses(self,inputString,infoDict):
         infoDict['addresses'] = None
         try:
-                pattern = re.compile(r'(?<=Address)(.*)',re.I)
+                pattern = re.compile(r'((?<=Address)(.*))',re.I)
                 matches = pattern.search(inputString) # Gets all email addresses as a list
                 if pattern:
                     addresses = matches.group()
@@ -327,16 +385,15 @@ class Parse():
         STOPWORDS = set(stopwords.words('english'))
 
         # Education Degrees
-        EDUCATION = [
-                    'BE','B.E.', 'B.E', 'BS', 'B.S', 
-                    'ME', 'M.E', 'M.E.', 'MS', 'M.S', 
-                    'BTECH', 'B.TECH', 'M.TECH', 'MTECH', 'ca',
-                    'SSC', 'HSC', 'CBSE', 'ICSE', 'X', 'XII','mba-finance',
-                ]
+        data = pd.read_csv("education.csv") 
+            
+            # extract values
+        EDUCATION = list(data.columns.values)
 
         nlp_text = nlp(inputString)
+        print(nlp_text)
 
-        # Sentence Tokenizer
+    # Sentence Tokenizer
         nlp_text = [sent.string.strip() for sent in nlp_text.sents]
 
         edu = {}
@@ -344,40 +401,67 @@ class Parse():
         for index, text in enumerate(nlp_text):
             for tex in text.split():
                 # Replace all special symbols
+
                 tex = re.sub(r'[?|$|.|!|,]', r'', tex)
-                if tex.upper().lower() in EDUCATION and tex not in STOPWORDS:
-                    print(tex,EDUCATION,"equivalence of value ")
+                print (tex,"education of the english")
+            
+                if tex.upper() in EDUCATION :
+
                     edu[tex] = text + nlp_text[index + 1]
 
-            # Extract year
+        # Extract year
         education = []
         infoDict['educations']=0
         infoDict['educations_year']=0
         educations=[]
         educations_years=[]
         for key in edu.keys():
+                print(key,edu[key],"education_key")
                 year = re.search(re.compile(r'(((20|19)(\d{2})))'), edu[key])
                 print(year)
                 if year:
                     education.append((key, ''.join(year[0])))
                 else:
-                    education.append(key)
-                print(education,"education")
-        for i in range(0,2):
-            count=0
-            for j in range(0,2):
-                
-                if count==0:
-                    educations.append(education[i][j])
-                    print(education[i][j])
-                if count==1:
-                    educations_years.append(education[i][j])
-                    print(education[i][j])
-                count+=1  
-        print(educations,educations_years)        
-        infoDict['educations']=educations
-        infoDict['educations_year']=educations_years          
-                           
+                    education.append(' ')
+        print(len(education),"education")
+        if len(education)!=0:        
+            for i in range(0,len(education)):
+                count=0
+                for j in range(0,2):
+                    
+                    if count==0:    
+                        educations.append(education[i][j])
+                        print(education[i][j])
+
+                    if count==1:
+                        educations_years.append(education[i][j])
+                        print(education[i][j])
+                    count+=1  
+        educate=[]
+        for i in range (0,len(education)):
+            print(i)
+            educate.append(education[i][0])    
+        print(educate,"educate")
+        print(educations_years,"educations_years")
+
+        for k in range(0,(len(educations_years))):
+            for j in range(k,len(educations_years)):
+                print(k)
+                if educations_years[k]>educations_years[j]:
+                    s=educations_years[k]
+                    educations_years[k]=educations_years[k+1]
+                    educations_years[k+1]=s
+
+                    s2=educate[k]
+                    educate[k]=educate[k+1]
+                    educate[k+1]=s2
+                    print(educations_years,"extracting")
+                    print(education,"educations")
+                    print(educations_years,"educations_years")  
+                    infoDict['educations']=educate
+                    infoDict['educations_year']=educations_years     
+                    return educate ,educations_years   
+                               
 
     def readFile(self, fileName):
         '''
@@ -533,8 +617,11 @@ class Parse():
             number = match
         except:
             pass
-
-        infoDict['Phone'] = number
+        j=''    
+        for i in number:
+           j+=str(i)+","
+        
+        infoDict['Phone'] = j
 
         if debug:
             print ("\n", pprint(infoDict), "\n")
@@ -559,46 +646,67 @@ class Parse():
         name = None
 
         try:
-            tokens, lines, sentences = self.preprocess(inputString)
-            tokens, lines, sentences = self.tokens, self.lines, self.sentences
-            # Try a regex chunk parser
-            # grammar = r'NAME: {<NN.*><NN.*>|<NN.*><NN.*><NN.*>}'
-            grammar = r'NAME: {<NN.*><NN.*><NN.*>*}'
-            # Noun phrase chunk is made out of two or three tags of type NN. (ie NN, NNP etc.) - typical of a name. {2,3} won't work, hence the syntax
-            # Note the correction to the rule. Change has been made later.
-            chunkParser = nltk.RegexpParser(grammar)
-            all_chunked_tokens = []
-            print(lines,tokens,sentences,"lines")
-            for tagged_tokens in lines:
-                # Creates a parse tree
-                if len(tagged_tokens) == 0: continue # Prevent it from printing warnings
-                chunked_tokens = chunkParser.parse(tagged_tokens)
-                all_chunked_tokens.append(chunked_tokens)
-                for subtree in chunked_tokens.subtrees():
-                    #  or subtree.label() == 'S' include in if condition if required
-                    if subtree.label() == 'NAME':
-                        for ind, leaf in enumerate(subtree.leaves()):
-                            if leaf[0].lower() in indianNames and 'NN' in leaf[1]:
-                                # Case insensitive matching, as indianNames have names in lowercase
-                                # Take only noun-tagged tokens
-                                # Surname is not in the name list, hence if match is achieved add all noun-type tokens
-                                # Pick upto 3 noun entities
-                                hit = " ".join([el[0] for el in subtree.leaves()[ind:ind+3]])
-                                # Check for the presence of commas, colons, digits - usually markers of non-named entities 
-                                if re.compile(r'[\d,:]').search(hit): continue
-                                nameHits.append(hit)
-                                # Need to iterate through rest of the leaves because of possible mis-matches
-            # Going for the first name hit
-            if len(nameHits) > 0:
-                nameHits = [re.sub(r'[^a-zA-Z \-]', '', el).strip() for el in nameHits] 
-                name = " ".join([el[0].upper()+el[1:].lower() for el in nameHits[0].split() if len(el)>0])
-                otherNameHits = nameHits[1:]
-
+                pattern = re.compile(r'(?<=name)(.+)',re.I)
+                matches = pattern.search(inputString) # Gets all email addresses as a list
+                if pattern:
+                    name = matches.group()
+                    if name:
+                       
+                        name=re.sub(r'[?|$|.|!|,|*|:]', r'', name).lstrip()
+                        print(name,"name of person")
+                        infoDict['name'] = name
         except Exception as e:
-            print (traceback.format_exc())
-            print (e)         
+            print (e )   
 
-        infoDict['name'] = name
+        if name:
+            print(name,"welcome")
+        else:
+            try:
+                tokens, lines, sentences = self.preprocess(inputString)
+                tokens, lines, sentences = self.tokens, self.lines, self.sentences
+                # Try a regex chunk parser
+                # grammar = r'NAME: {<NN.*><NN.*>|<NN.*><NN.*><NN.*>}'
+                grammar = r'NAME: {<NN.*><NN.*><NN.*>*}'
+                # Noun phrase chunk is made out of two or three tags of type NN. (ie NN, NNP etc.) - typical of a name. {2,3} won't work, hence the syntax
+                # Note the correction to the rule. Change has been made later.
+                chunkParser = nltk.RegexpParser(grammar)
+                all_chunked_tokens = []
+                print(lines,tokens,sentences,"lines")
+                for tagged_tokens in lines:
+                    # Creates a parse tree
+                    if len(tagged_tokens) == 0: continue # Prevent it from printing warnings
+                    chunked_tokens = chunkParser.parse(tagged_tokens)
+                    all_chunked_tokens.append(chunked_tokens)
+                    for subtree in chunked_tokens.subtrees():
+                        #  or subtree.label() == 'S' include in if condition if required
+                        if subtree.label() == 'NAME':
+                            for ind, leaf in enumerate(subtree.leaves()):
+                                if leaf[0].lower() in indianNames and 'NN' in leaf[1]:
+                                    # Case insensitive matching, as indianNames have names in lowercase
+                                    # Take only noun-tagged tokens
+                                    # Surname is not in the name list, hence if match is achieved add all noun-type tokens
+                                    # Pick upto 3 noun entities
+                                    hit = " ".join([el[0] for el in subtree.leaves()[ind:ind+3]])
+                                    # Check for the presence of commas, colons, digits - usually markers of non-named entities 
+                                    if re.compile(r'[\d,:]').search(hit): continue
+                                    nameHits.append(hit)
+                                    # Need to iterate through rest of the leaves because of possible mis-matches
+                # Going for the first name hit
+                if len(nameHits) > 0:
+                    nameHits = [re.sub(r'[^a-zA-Z \-]', '', el).strip() for el in nameHits] 
+                    name = " ".join([el[0].upper()+el[1:].lower() for el in nameHits[0].split() if len(el)>0])
+                    otherNameHits = nameHits[1:]
+
+            except Exception as e:
+                print (traceback.format_exc())
+                print (e)         
+
+            infoDict['name'] = name
+           
+        
+          
+      
+
         infoDict['otherNameHits'] = otherNameHits
 
         if debug:
@@ -640,120 +748,82 @@ class Parse():
 
         
 
-    def getQualification(self,inputString,infoDict,D1,D2):
+    def getQualification(self,inputString,infoDict,D1):
         #key=list(qualification.keys())
+           #key=list(qualification.keys())
         qualification={'institute':'','year':''}
-        print(inputString,infoDict,D1,D2,"parameters of getQualification")
-
         nameofinstitutes=open('nameofinstitutes.txt','r').read().lower()#open file which contains keywords like institutes,university usually  fond in institute names
         nameofinstitues=set(nameofinstitutes.split())
-        
-        print(nameofinstitues,"nameofinstitues")
         instiregex=r'INSTI: {<DT.>?<NNP.*>+<IN.*>?<NNP.*>?}'
-        print(instiregex,"instiregex")
         chunkParser = nltk.RegexpParser(instiregex)
-        print(chunkParser,"chunkParser")
-        print("==================================")
-        print("inputString",inputString)
-        print("infoDict",infoDict)
-
-        print("==================================")
+        insensitives=''
+        
         try:           
             index=[]
-            line=[]
-            print ("text",self.lines)
-            print(D1,D2,"D2")#saves all the lines where it finds the word of that education
+            line=[]#saves all the lines where it finds the word of that education
             for ind, sentence in enumerate(self.lines):#find the index of the sentence where the degree is find and then analyse that sentence
-                sen=" ".join([words[0].lower() for words in sentence]) #string of words
-                print("sen",sen)
-                if re.search(D1,sen) or re.search(D2,sen):
-                    index.append(ind)
-                    print(ind,"ind")  #list of all indexes where word Ca lies
+                sen=" ".join([words[0].lower() for words in sentence]) 
+                print(D1,"the i")
+                #string of words
+                if D1=="BCom":
+                    D1="b.com"
+
+                if re.search(D1,sen,re.I) :
+                    index.append(ind)  #list of all indexes where word Ca lies
             if index:#only finds for Ca rank and CA year if it finds the word Ca in the document
-                print(index)
+                
                 for indextocheck in index:#checks all nearby lines where it founds the degree word.ex-'CA'
-                    print(indextocheck,"indextocheck")
                     for i in [indextocheck,indextocheck+1]: #checks the line with the keyword and just the next line to it
                         try:
                             try:
-                                print(i)
                                 wordstr=" ".join(words[0] for words in self.lines[i])#string of that particular line
-                                print(wordstr,"wordstrz")
                             except:
                                 wordstr=""
                             #if re.search(r'\D\d{1,3}\D',wordstr.lower()) and qualification['rank']=='':
                                     #qualification['rank']=re.findall(r'\D\d{1,3}\D',wordstr.lower())
                                     #line.append(wordstr)
                             if re.search(r'\b[21][09][8901][0-9]',wordstr.lower()) and qualification['year']=='':
-
                                     qualification['year']=re.findall(r'\b[21][09][8901][0-9]',wordstr.lower())
                                     line.append(wordstr)
-                                    print(line,"line")
-                            chunked_line = chunkParser.parse(self.lines[i])#regex chunk for searching univ name
+                            chunked_line = chunkParser.parse(self.lines[i])
                             print(chunked_line,"chunked_line")
+                            #regex chunk for searching univ name
                             for subtree in chunked_line.subtrees():
                                     if subtree.label()=='INSTI':
                                         for ind,leaves in enumerate(subtree):
                                             if leaves[0].lower() in nameofinstitutes and leaves[1]=='NNP' and qualification['institute']=='':
                                                 qualification['institute']=' '.join([words[0]for words in subtree.leaves()])
-                                                line.append(wordstr)
-                                                print(line,"append list ")
+                                                print(qualification['institute'],"institute of the qualification")
+                                                insensitives=qualification['institute']
                                 
                         except Exception as e:
                             print (traceback.format_exc())
-
-            if D1=='c\.?a':
-                infoDict['%sinstitute'%D1] ="I.C.A.I"
-            else:
-                if qualification['institute']:
-                    infoDict['%sinstitute'%D1] = str(qualification['institute'])
-                else:
-                    infoDict['%sinstitute'%D1] = "NULL"
-            if qualification['year']:
-                infoDict['%syear'%D1] = int(qualification['year'][0])
-            else:
-                infoDict['%syear'%D1] =0
-            infoDict['%sline'%D1]=list(set(line))
+            print(insensitives,"lines")
+            return(insensitives)
         except Exception as e:
             print (traceback.format_exc())
-            print (e) 
-
+ 
 
     def Qualification(self,inputString,infoDict,debug=False):
-    
+        infoDict['educations_name']=0
         #Q={'CAinformation':'','ICWAinformation':'','B.Cominformation':'','M.Cominformation':'','MBAinformation':''}
         degre=[]
         #degree1=open('degree.txt','r').read().lower()#string to read from the txt file which contains all the degrees
         #degree=set(el for el in degree1.split('\n'))#saves all the degrees seperated by new lines,degree name contains both abbreviation and full names check file
         #qualification1={'CAline':'','CAcollege':'','CArank':'','CAyear':''}
-        
-        jayatemp=self.getQualification(self.inputString,infoDict,'c\.?a','chartered accountant')
-        
-        print(infoDict,"getQualification")
-        print(infoDict['%sline'%'c\.?a'],"infoDict['%sline'%'c\.?a']")
-        if infoDict['%sline'%'c\.?a']:
-         degre.append('ca')
-        self.getQualification(self.inputString,infoDict,'icwa','icwa')
-        if infoDict['%sline'%'icwa']:
-         degre.append('icwa')
-        self.getQualification(self.inputString,infoDict,'b\.?com','bachelor of commerce')
-        if infoDict['%sline'%'b\.?com']:
-         degre.append('b.com')
-        self.getQualification(self.inputString,infoDict,'m\.?com','masters of commerce')
-        if infoDict['%sline'%'m\.?com']:
-         degre.append('m.com') 
-        self.getQualification(self.inputString,infoDict,'mba','mba')
-        if infoDict['%sline'%'mba']:
-         degre.append('mba')
-        if degre:
-            print(degre,"degre")
-            infoDict['degree'] = degre
-        else:
-            infoDict['degree'] = "NONE"
-        if debug:
-            print ("\n", pprint(infoDict), "\n")
-            code.interact(local=locals())
-        return infoDict['degree']
+        info = {}
+        self.extract_education(self.inputString,info)
+        out=[]
+        s1=[]
+        print(info,"qualification")
+        if info['educations']: 
+            for i in info['educations']:
+                s1.append(self.getQualification(self.inputString,infoDict,i))
+                print(s1,"list of education name ")
+
+                infoDict['educations_name']=s1           
+
+
 
 
 if __name__ == "__main__":

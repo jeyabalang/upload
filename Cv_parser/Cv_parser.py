@@ -47,7 +47,10 @@ def formhandler():
         
        # ,na_values="Na,
         datsets=pd.read_excel(df, index=False)
+        print(datsets,"index false")
+        datsets.columns = datsets.columns.str.replace(' ', '')
         datsets.fillna("", inplace = True)
+        datsets.drop(columns='extension')
         datsets.to_string(index=False)
         print(datsets,"datasets")
 
@@ -57,21 +60,21 @@ def formhandler():
         datsets['addresses'] = datsets['addresses'].str.replace('\t', ' ').str.replace('\n', ' ')
         
         datsets['work_experience'] = datsets['work_experience'].str.replace('\t', ' ').str.replace('\n', ' ')
-        datsets.dropna(how='any')    #to drop if any value in the row has a nan
+        datsets.dropna()    #to drop if any value in the row has a nan
         datsets.dropna(how='all') 
         
         datsets.style.set_properties(**{'font-size': '11pt', 'font-family': 'Calibri','border-collapse': 'collapse','border': '1px solid black'}).render()
-        datsets.columns = ['Extension',   'FileName',   'Name'  , 'Email',   'Phone' ,' Date of birth', 'Addresses' ,'Education','Education_year','Soft skill','Technical skill','Workexperience' ,'Overall Experience']
-        
+        datsets.columns = ['Extension',   'FileName',   'Name'  , 'Email',   'Phone' ,' Date of birth', 'Addresses' ,'Degree Name','Education year','Institute Name','Soft skill','Technical skill','Organization year','Organization Name' ,'Counted Experience']
+        datsets.dropna()
         print (datsets,"datasets of name ")
         Details = datsets.loc[:,"Extension":"Addresses"]
-        Education = datsets.loc[:,"Education":"Education_year"]
+        Education = datsets.loc[:,"Degree Name":"Institute Name"]
         
         skill = datsets.loc[:,"Soft skill":"Technical skill"]
-        Work_experience=datsets.loc[:,"Workexperience":"Overall Experience"]
+        Work_experience=datsets.loc[:,"Organization year":"Counted Experience"]
 
         Details=Details.T
-        Education=Education.T
+       
         skill=skill.T
         work_experience=Work_experience.T
       
