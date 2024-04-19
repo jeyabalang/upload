@@ -19,8 +19,8 @@ For example, a _static_ route will tell us if a query is talking about mathemati
 ## Installing the Library
 """
 
-pip install -qU semantic-router==0.0.32
-pip install unifyai
+#pip install -qU semantic-router==0.0.32
+#pip install unifyai
 
 """## Initializing Routes and RouteLayer
 
