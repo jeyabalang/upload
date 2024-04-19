@@ -144,7 +144,7 @@ get_time("America/New_York")
 from semantic_router.utils.function_call import get_schema
 
 schema = get_schema(get_time)
-schema
+print(schema)
 
 """We use this to define our dynamic route:"""
 
