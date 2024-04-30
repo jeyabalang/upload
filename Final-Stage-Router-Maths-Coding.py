@@ -197,6 +197,11 @@ def main():
                 response = future.result()
                 st.session_state.chat_history.append(("user", user_input))
                 st.session_state.chat_history.append(("assistant", response))
+                reset_button_key = "reset_button"
+                reset_button = st.button("Reset Chat",key=reset_button_key)
+                if reset_button:
+                    st.session_state.conversation = None
+                    st.session_state.chat_history = None
                 st.rerun()
         else:
             st.warning("Type something to start chatting.")
