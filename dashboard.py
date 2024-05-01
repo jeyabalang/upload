@@ -24,7 +24,7 @@ async def main():
 async def load_dashboard():
     print('Loading dashboard')
     dirname = os.path.dirname(__file__)
-    filename = os.path.join(dirname, 'dummy.py')
+    filename = os.path.join(dirname, 'Final-Stage-Router-Maths-Coding.py')
     args = []
     streamlit.bootstrap.run(filename, '', args, flag_options={})
     print('Loaded.')
