@@ -327,7 +327,30 @@ def main():
                 #create conversation chain 
                 st.session_state.conversation = get_conversation_chain(vectorstore)
 
-    
+    if prompt := st.chat_input():
+
+    if not st.secrets.hugging_face_token.api_key:
+        st.info("Please add your Hugging Face Token to continue.")
+        st.stop()
+
+    # Input prompt
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.chat_message("user").write(prompt)
+
+    # Query Stable Diffusion
+    headers = {"Authorization": f"Bearer {st.secrets.hugging_face_token.api_key}"}
+    image_bytes = query_stabilitydiff({
+        "inputs": prompt,
+    }, headers)
+
+    # Return Image
+    image = Image.open(io.BytesIO(image_bytes))
+    msg = f'here is your image related to "{prompt}"'
+
+    # Show Result
+    st.session_state.messages.append({"role": "assistant", "content": msg, "prompt": prompt, "image": image})
+    st.chat_message("assistant").write(msg)
+    st.chat_message("assistant").image(image, caption=prompt, use_column_width=True)
 
 if __name__== '__main__':
     main()
