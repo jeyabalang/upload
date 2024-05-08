@@ -186,7 +186,14 @@ def main():
 
         # Chat input at the bottom of the page
         user_input = st.chat_input("Say something", key="chat_input")
-        X, y = zip(*user_input)
+        test_data = [
+        ("3+3", "mathematics"),
+        ("4*4", "mathematics"),
+        ("java", "coding"),
+        ("4+2", None),
+        ]
+        
+        X, y = zip(*test_data)
 
         # evaluate using the default thresholds
         accuracy = rl.evaluate(X=X, y=y)
