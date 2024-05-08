@@ -22,7 +22,8 @@ async def semantic_route(api_key, route_endpoint, user_input):
     )
    # Generate the response using Unify
     response = await unify.generate(user_prompt=user_input)
-   # If response is a string and not a stream, handle it directly
+    
+    # If response is a string and not a stream, handle it directly
     if isinstance(response, str):
         return response
 
@@ -94,6 +95,7 @@ def defineRoutes():
 
     # List of all routes
     routes = [math_route, coding_route]
+    user_input
     return routes
 
 
@@ -184,6 +186,11 @@ def main():
 
         # Chat input at the bottom of the page
         user_input = st.chat_input("Say something", key="chat_input")
+        X, y = zip(*user_input)
+
+        # evaluate using the default thresholds
+        accuracy = rl.evaluate(X=X, y=y)
+        print(f"Accuracy: {accuracy*100:.2f}%")
         reset_button_key = "reset_button"
         reset_button = st.button("Reset Chat",key=reset_button_key)
         if reset_button:
@@ -333,6 +340,26 @@ def main():
         st.info("Please add your Hugging Face Token to continue.")
         st.stop()
 
+    test_data = [
+    ("3+3", "mathematics"),
+    ("4*4", "mathematics"),
+    ("java", "coding"),
+    ("4+2", None),
+    ]
+    
+    # unpack the test data
+    X, y = zip(*test_data)
+    
+    # evaluate using the default thresholds
+    accuracy = rl.evaluate(X=X, y=y)
+    print(f"Accuracy: {accuracy*100:.2f}%")
+    route_thresholds = rl.get_thresholds()
+    print("Default route thresholds:", route_thresholds)
+    rl.fit(X=X, y=y)
+    route_thresholds = rl.get_thresholds()
+    print("Updated route thresholds:", route_thresholds)
+    accuracy = rl.evaluate(X=X, y=y)
+    print(f"Accuracy: {accuracy*100:.2f}%")
     # Input prompt
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
@@ -348,7 +375,7 @@ def main():
     msg = f'here is your image related to "{prompt}"'
 
     # Show Result
-    st.session_state.messages.append({"role": "assistant", "content": msg, "prompt": prompt, "image": image})
+    st.session_state.messages.append({"role": "assistant", "content": msg, "prompt": prompt, "image": image,"accuracy":accuracy,"route_thresholds":route_thresholds})
     st.chat_message("assistant").write(msg)
     st.chat_message("assistant").image(image, caption=prompt, use_column_width=True)
 
