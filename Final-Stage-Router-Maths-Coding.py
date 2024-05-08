@@ -226,7 +226,7 @@ def main():
                 print("Updated route thresholds:", route_thresholds)
                 accuracy = rl.evaluate(X=X, y=y)
                 print(f"Accuracy: {accuracy*100:.2f}%")
-                st.session_state.chat_history.append(("user", user_input))
+                st.session_state.chat_history.append(("user", user_input,"accuracy":accuracy,"route_thresholds":route_thresholds))
                 st.session_state.chat_history.append(("assistant", response))
                 
         else:
