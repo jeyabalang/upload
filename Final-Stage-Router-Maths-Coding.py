@@ -355,48 +355,48 @@ def main():
 
     if prompt := st.chat_input():
 
-    if not st.secrets.hugging_face_token.api_key:
-        st.info("Please add your Hugging Face Token to continue.")
-        st.stop()
-
-    test_data = [
-    ("3+3", "mathematics"),
-    ("4*4", "mathematics"),
-    ("java", "coding"),
-    ("4+2", None),
-    ]
+        if not st.secrets.hugging_face_token.api_key:
+            st.info("Please add your Hugging Face Token to continue.")
+            st.stop()
     
-    # unpack the test data
-    X, y = zip(*test_data)
+        test_data = [
+        ("3+3", "mathematics"),
+        ("4*4", "mathematics"),
+        ("java", "coding"),
+        ("4+2", None),
+        ]
+        
+        # unpack the test data
+        X, y = zip(*test_data)
+        
+        # evaluate using the default thresholds
+        accuracy = rl.evaluate(X=X, y=y)
+        print(f"Accuracy: {accuracy*100:.2f}%")
+        route_thresholds = rl.get_thresholds()
+        print("Default route thresholds:", route_thresholds)
+        rl.fit(X=X, y=y)
+        route_thresholds = rl.get_thresholds()
+        print("Updated route thresholds:", route_thresholds)
+        accuracy = rl.evaluate(X=X, y=y)
+        print(f"Accuracy: {accuracy*100:.2f}%")
+        # Input prompt
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        st.chat_message("user").write(prompt)
     
-    # evaluate using the default thresholds
-    accuracy = rl.evaluate(X=X, y=y)
-    print(f"Accuracy: {accuracy*100:.2f}%")
-    route_thresholds = rl.get_thresholds()
-    print("Default route thresholds:", route_thresholds)
-    rl.fit(X=X, y=y)
-    route_thresholds = rl.get_thresholds()
-    print("Updated route thresholds:", route_thresholds)
-    accuracy = rl.evaluate(X=X, y=y)
-    print(f"Accuracy: {accuracy*100:.2f}%")
-    # Input prompt
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    st.chat_message("user").write(prompt)
-
-    # Query Stable Diffusion
-    headers = {"Authorization": f"Bearer {st.secrets.hugging_face_token.api_key}"}
-    image_bytes = query_stabilitydiff({
-        "inputs": prompt,
-    }, headers)
-
-    # Return Image
-    image = Image.open(io.BytesIO(image_bytes))
-    msg = f'here is your image related to "{prompt}"'
-
-    # Show Result
-    st.session_state.messages.append({"role": "assistant", "content": msg, "prompt": prompt, "image": image,"accuracy":accuracy,"route_thresholds":route_thresholds})
-    st.chat_message("assistant").write(msg)
-    st.chat_message("assistant").image(image, caption=prompt, use_column_width=True)
+        # Query Stable Diffusion
+        headers = {"Authorization": f"Bearer {st.secrets.hugging_face_token.api_key}"}
+        image_bytes = query_stabilitydiff({
+            "inputs": prompt,
+        }, headers)
+    
+        # Return Image
+        image = Image.open(io.BytesIO(image_bytes))
+        msg = f'here is your image related to "{prompt}"'
+    
+        # Show Result
+        st.session_state.messages.append({"role": "assistant", "content": msg, "prompt": prompt, "image": image,"accuracy":accuracy,"route_thresholds":route_thresholds})
+        st.chat_message("assistant").write(msg)
+        st.chat_message("assistant").image(image, caption=prompt, use_column_width=True)
 
 if __name__== '__main__':
     main()
