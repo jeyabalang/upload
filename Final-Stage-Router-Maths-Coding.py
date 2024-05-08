@@ -207,6 +207,25 @@ def main():
                 future = executor.submit(
                     async_chat_wrapper, user_input, st.session_state.huggingface_apikey, st.session_state.unify_key, routes, selected_model)
                 response = future.result()
+                test_data = [
+                ("3+3", "mathematics"),
+                ("4*4", "mathematics"),
+                ("java", "coding"),
+                ("4+2", None),
+                ]
+                # unpack the test data
+                X, y = zip(*test_data)
+                
+                # evaluate using the default thresholds
+                accuracy = rl.evaluate(X=X, y=y)
+                print(f"Accuracy: {accuracy*100:.2f}%")
+                route_thresholds = rl.get_thresholds()
+                print("Default route thresholds:", route_thresholds)
+                rl.fit(X=X, y=y)
+                route_thresholds = rl.get_thresholds()
+                print("Updated route thresholds:", route_thresholds)
+                accuracy = rl.evaluate(X=X, y=y)
+                print(f"Accuracy: {accuracy*100:.2f}%")
                 st.session_state.chat_history.append(("user", user_input))
                 st.session_state.chat_history.append(("assistant", response))
                 
